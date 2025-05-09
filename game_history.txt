@@ -13,3 +13,6 @@ Yober 12.0
 Pepsi 1.0
 Pepsi 3.0
 TEEEEEEEEEEEST 3.0
+Marian 1.0
+Bozo 2.0
+Marian 3.0

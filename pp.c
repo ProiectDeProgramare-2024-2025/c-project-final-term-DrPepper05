@@ -5,17 +5,25 @@
 
 #define MAX_QUESTIONS 15
 
+// ANSI color codes
+#define RESET "\033[0m"
+#define DARKGRAY "\033[90m"
+#define LIGHTBLUE "\033[94m"
+#define GREEN "\033[32m"
+#define RED "\033[31m"
+
 // struct for quiz
-typedef struct {
+typedef struct
+{
     char question[256];
     char choices[4][256];
     int correctAnswer; // index (0-3) of the correct answer
 } Question;
 
-
 Question questions[MAX_QUESTIONS];
 
-typedef struct {
+typedef struct
+{
     char name[100];
     float score;
 } Record;
@@ -25,7 +33,8 @@ void playGame();
 void viewLeaderboard();
 void viewGameHistory();
 
-void initQuestions() {
+void initQuestions()
+{
     strcpy(questions[0].question, "What is the capital of France?");
     strcpy(questions[0].choices[0], "Berlin");
     strcpy(questions[0].choices[1], "London");
@@ -132,135 +141,176 @@ void initQuestions() {
     questions[14].correctAnswer = 1;
 }
 
-void playGame() {
-    float totalScore = 0.0;
-    int questionIndex;
+void playGame()
+{
+    float totalScore = 0.0f;
     char answer[10];
     int lifelineUsed;
-    system("clear");
 
-    printf("\nStarting the game...\n");
-    for(questionIndex = 0; questionIndex < MAX_QUESTIONS; questionIndex++) {
+    for (int i = 0; i < MAX_QUESTIONS; i++)
+    {
         system("clear");
         lifelineUsed = 0;
-        printf("\nQuestion %d: %s\n", questionIndex + 1, questions[questionIndex].question);
-        printf("A. %s\n", questions[questionIndex].choices[0]);
-        printf("B. %s\n", questions[questionIndex].choices[1]);
-        printf("C. %s\n", questions[questionIndex].choices[2]);
-        printf("D. %s\n", questions[questionIndex].choices[3]);
+        printf("\nQuestion %d: %s\n", i + 1, questions[i].question);
+        printf("A. %s\n", questions[i].choices[0]);
+        printf("B. %s\n", questions[i].choices[1]);
+        printf("C. %s\n", questions[i].choices[2]);
+        printf("D. %s\n", questions[i].choices[3]);
 
         printf("Enter your answer (A, B, C, D) or type '50' for 50/50 lifeline: ");
         scanf("%s", answer);
 
-        if(strcmp(answer, "50") == 0) {
+        if (strcmp(answer, "50") == 0)
+        {
             lifelineUsed = 1;
-            int incorrectOptions[3];
-            int idx = 0;
-            for (int i = 0; i < 4; i++) {
-                if(i != questions[questionIndex].correctAnswer) {
-                    incorrectOptions[idx++] = i;
-                }
-            }
-            int randomIndex = rand() % 3;
-            int keptOption = incorrectOptions[randomIndex];
-            printf("\n50/50 Lifeline used. Remaining options:\n");
-            char letter;
-            switch(questions[questionIndex].correctAnswer) {
-                case 0: letter = 'A'; break;
-                case 1: letter = 'B'; break;
-                case 2: letter = 'C'; break;
-                case 3: letter = 'D'; break;
-                default: letter = '?';
-            }
-            printf("%c. %s\n", letter, questions[questionIndex].choices[questions[questionIndex].correctAnswer]);
+            int incorrectOptions[3], idx = 0;
+            for (int j = 0; j < 4; j++)
+                if (j != questions[i].correctAnswer)
+                    incorrectOptions[idx++] = j;
+            int kept = incorrectOptions[rand() % 3];
 
-            switch(keptOption) {
-                case 0: letter = 'A'; break;
-                case 1: letter = 'B'; break;
-                case 2: letter = 'C'; break;
-                case 3: letter = 'D'; break;
-                default: letter = '?';
+            printf("\n50/50 Lifeline used. Remaining options:\n");
+            char let;
+            switch (questions[i].correctAnswer)
+            {
+            case 0:
+                let = 'A';
+                break;
+            case 1:
+                let = 'B';
+                break;
+            case 2:
+                let = 'C';
+                break;
+            case 3:
+                let = 'D';
+                break;
             }
-            printf("%c. %s\n", letter, questions[questionIndex].choices[keptOption]);
+            printf("%c. %s\n", let, questions[i].choices[questions[i].correctAnswer]);
+
+            switch (kept)
+            {
+            case 0:
+                let = 'A';
+                break;
+            case 1:
+                let = 'B';
+                break;
+            case 2:
+                let = 'C';
+                break;
+            case 3:
+                let = 'D';
+                break;
+            }
+            printf("%c. %s\n", let, questions[i].choices[kept]);
 
             printf("Enter your answer (letter corresponding to the remaining options): ");
             scanf("%s", answer);
         }
 
         int answerIndex = -1;
-        if(answer[0] == 'A' || answer[0] == 'a')
+        if (answer[0] == 'A' || answer[0] == 'a')
             answerIndex = 0;
-        else if(answer[0] == 'B' || answer[0] == 'b')
+        else if (answer[0] == 'B' || answer[0] == 'b')
             answerIndex = 1;
-        else if(answer[0] == 'C' || answer[0] == 'c')
+        else if (answer[0] == 'C' || answer[0] == 'c')
             answerIndex = 2;
-        else if(answer[0] == 'D' || answer[0] == 'd')
+        else if (answer[0] == 'D' || answer[0] == 'd')
             answerIndex = 3;
-        else {
+
+        if (answerIndex < 0)
+        {
             printf("Invalid input. Game over.\n");
             break;
         }
 
-        if(answerIndex == questions[questionIndex].correctAnswer) {
-            if(lifelineUsed)
-                totalScore += 0.5;
-            else
-                totalScore += 1.0;
-            printf("Correct!\n");
-        } else {
-            printf("Incorrect. The correct answer was ");
-            char correctLetter;
-            switch(questions[questionIndex].correctAnswer) {
-                case 0: correctLetter = 'A'; break;
-                case 1: correctLetter = 'B'; break;
-                case 2: correctLetter = 'C'; break;
-                case 3: correctLetter = 'D'; break;
-                default: correctLetter = '?';
+        if (answerIndex == questions[i].correctAnswer)
+        {
+            totalScore += lifelineUsed ? 0.5f : 1.0f;
+            printf(GREEN "Correct!\n" RESET);
+        }
+        else
+        {
+            char let;
+            switch (questions[i].correctAnswer)
+            {
+            case 0:
+                let = 'A';
+                break;
+            case 1:
+                let = 'B';
+                break;
+            case 2:
+                let = 'C';
+                break;
+            case 3:
+                let = 'D';
+                break;
             }
-            printf("%c. %s\n", correctLetter, questions[questionIndex].choices[questions[questionIndex].correctAnswer]);
+            printf(RED "Incorrect. The correct answer was %c. %s\n" RESET,
+                   let, questions[i].choices[questions[i].correctAnswer]);
             break;
         }
-    }
-    system("clear");
-    printf("\nGame over! Your total score: %.1f out of %d\n", totalScore, MAX_QUESTIONS);
 
-    char name[100];
+        getchar(); // consume newline
+        printf("Press Enter to continue...");
+        getchar();
+    }
+
+    system("clear");
+    printf("\nGame over! Your total score: %.1f out of %d\n",
+           totalScore, MAX_QUESTIONS);
+
+    Record rec;
     printf("Enter your name: ");
-    scanf("%s", name);
+    scanf("%s", rec.name);
+    rec.score = totalScore;
 
     FILE *fp = fopen("game_history.txt", "a");
-    if(fp == NULL) {
-        printf("Error saving game history.\n");
-    } else {
-        fprintf(fp, "%s %.1f\n", name, totalScore);
+    if (fp)
+    {
+        fprintf(fp, "%s %.1f\n", rec.name, rec.score);
         fclose(fp);
+    }
+    else
+    {
+        printf("Error saving game history.\n");
     }
 }
 
-int compareRecords(const void *a, const void *b) {
-    Record *r1 = (Record *)a;
-    Record *r2 = (Record *)b;
-    if(r2->score > r1->score) return 1;
-    else if(r2->score < r1->score) return -1;
-    else return 0;
+int compareRecords(const void *a, const void *b)
+{
+    const Record *r1 = a;
+    const Record *r2 = b;
+    if (r2->score > r1->score)
+        return 1;
+    if (r2->score < r1->score)
+        return -1;
+    return 0;
 }
 
-void viewLeaderboard() {
+void viewLeaderboard()
+{
     getchar();
     FILE *fp = fopen("game_history.txt", "r");
-    if(fp == NULL) {
+    if (!fp)
+    {
         printf("\nNo game history found.\n");
         return;
     }
+
     Record records[1000];
     int count = 0;
-    while(fscanf(fp, "%s %f", records[count].name, &records[count].score) == 2) {
+    while (count < 1000 &&
+           fscanf(fp, "%s %f", records[count].name, &records[count].score) == 2)
+    {
         count++;
-        if(count >= 1000) break;
     }
     fclose(fp);
 
-    if(count == 0) {
+    if (count == 0)
+    {
         printf("\nNo records to display.\n");
         return;
     }
@@ -269,80 +319,109 @@ void viewLeaderboard() {
 
     printf("\nLeaderboard:\n");
     printf("%-20s %s\n", "Name", "Score");
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
+    {
         printf("%-20s %.1f\n", records[i].name, records[i].score);
     }
+
+    printf("\nPress Enter to return to menu...");
     getchar();
 }
 
-void viewGameHistory() {
+void viewGameHistory()
+{
     getchar();
     char searchName[100];
     printf("\nEnter the name to view game history: ");
     scanf("%s", searchName);
+
     system("clear");
     FILE *fp = fopen("game_history.txt", "r");
-    if(fp == NULL) {
+    if (!fp)
+    {
         printf("No game history found.\n");
         return;
     }
+
     int found = 0;
     printf("\nGame history for %s:\n", searchName);
-    while(1) {
+    while (1)
+    {
         char name[100];
         float score;
-        if(fscanf(fp, "%s %f", name, &score) != 2)
+        if (fscanf(fp, "%s %f", name, &score) != 2)
             break;
-        if(strcmp(name, searchName) == 0) {
+        if (strcmp(name, searchName) == 0)
+        {
             printf("Score: %.1f\n", score);
             found = 1;
         }
     }
     fclose(fp);
-    if(!found) {
+
+    if (!found)
+    {
         printf("No records found for %s.\n", searchName);
     }
+
+    printf("\nPress Enter to return to menu...");
     getchar();
     getchar();
 }
 
-int main() {
-    srand(time(NULL));
+int main()
+{
+    srand((unsigned)time(NULL));
     initQuestions();
 
     int choice;
-    do {
+    do
+    {
         system("clear");
-        printf("\n--- Quiz Game Menu ---\n");
-        printf("1. Play Game\n");
-        printf("2. View Leaderboard\n");
-        printf("3. View Game History\n");
-        printf("4. Exit\n");
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
-        
-        switch(choice) {
-            case 1:
-                system("clear");
-                playGame();
-                break;
-            case 2:
-                system("clear");
-                viewLeaderboard();
-                break;
-            case 3:
-                system("clear");
-                viewGameHistory();
-                break;
-            case 4:
-                system("clear");
-                printf("Exiting the game. Goodbye!\n");
-                break;
-            default:
-                system("clear");
-                printf("Invalid choice. Please try again.\n");
+        // Menu header in dark gray
+        printf(DARKGRAY "\n--- Quiz Game Menu ---\n" RESET);
+        // Options: label in dark gray, text in light blue
+        printf(DARKGRAY "1. " LIGHTBLUE "Play Game\n" RESET);
+        printf(DARKGRAY "2. " LIGHTBLUE "View Leaderboard\n" RESET);
+        printf(DARKGRAY "3. " LIGHTBLUE "View Game History\n" RESET);
+        printf(DARKGRAY "4. " LIGHTBLUE "Exit\n" RESET);
+        // Prompt: static in dark gray, keyword in light blue
+        printf(DARKGRAY "Enter your " LIGHTBLUE "choice" DARKGRAY ": " RESET);
+
+        if (scanf("%d", &choice) != 1)
+        {
+            choice = 0;
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF)
+                ;
         }
-    } while(choice != 4);
+
+        switch (choice)
+        {
+        case 1:
+            system("clear");
+            playGame();
+            break;
+        case 2:
+            system("clear");
+            viewLeaderboard();
+            break;
+        case 3:
+            system("clear");
+            viewGameHistory();
+            break;
+        case 4:
+            system("clear");
+            printf("Exiting the game. Goodbye!\n");
+            break;
+        default:
+            system("clear");
+            printf("Invalid choice. Please try again.\n");
+            printf("Press Enter to continue...");
+            getchar();
+            getchar();
+        }
+    } while (choice != 4);
 
     return 0;
 }
